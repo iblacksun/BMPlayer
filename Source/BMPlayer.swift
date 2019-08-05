@@ -31,7 +31,6 @@ enum BMPanDirection: Int {
 }
 
 open class BMPlayer: UIView {
-    
     open weak var delegate: BMPlayerDelegate?
     
     open var backBlock:((Bool) -> Void)?
@@ -72,9 +71,13 @@ open class BMPlayer: UIView {
     
     fileprivate var customControlView: BMPlayerControlView?
     
+    private var _isFullScreen: Bool?
     fileprivate var isFullScreen:Bool {
+        set {
+            _isFullScreen = newValue
+        }
         get {
-            return UIApplication.shared.statusBarOrientation.isLandscape
+            return _isFullScreen ?? UIApplication.shared.statusBarOrientation.isLandscape
         }
     }
     
@@ -329,8 +332,9 @@ open class BMPlayer: UIView {
     }
     
     @objc fileprivate func fullScreenButtonPressed() {
-        controlView.updateUI(!self.isFullScreen)
-        if isFullScreen {
+        self.isFullScreen.toggle()
+        controlView.updateUI(self.isFullScreen)
+        if !isFullScreen {
             UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
             UIApplication.shared.setStatusBarHidden(false, with: .fade)
             UIApplication.shared.statusBarOrientation = .portrait
@@ -338,6 +342,10 @@ open class BMPlayer: UIView {
             UIDevice.current.setValue(UIInterfaceOrientation.landscapeRight.rawValue, forKey: "orientation")
             UIApplication.shared.setStatusBarHidden(false, with: .fade)
             UIApplication.shared.statusBarOrientation = .landscapeRight
+        }
+        // iPad 下 UIDevice.current.setValue( forKey: "orientation") 无效，无法触发通知，手动调用
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            delegate?.bmPlayer(player: self, playerOrientChanged: isFullScreen)
         }
     }
     
