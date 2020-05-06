@@ -513,9 +513,9 @@ extension BMPlayer: BMPlayerControlViewDelegate {
                 backBlock?(isFullScreen)
                 if isFullScreen {
                     fullScreenButtonPressed()
-                } else {
+                }/* else {
                     playerLayer?.prepareToDeinit()
-                }
+                }*/
                 
             case .play:
                 if button.isSelected {
