@@ -35,7 +35,11 @@
         "Source/*.swift",
         "Source/Default/*"
       ],
-      "resources": "Source/**/*.xcassets",
+      "resource_bundles": {
+        "BMPlayer-Images": [
+          "Source/**/*.xcassets"
+        ]
+      },
       "frameworks": [
         "UIKit",
         "AVFoundation"
@@ -58,7 +62,11 @@
         "Source/*.swift",
         "Source/CacheSupport/*"
       ],
-      "resources": "Source/**/*.xcassets",
+      "resource_bundles": {
+        "BMPlayer-Images": [
+          "Source/**/*.xcassets"
+        ]
+      },
       "frameworks": [
         "UIKit",
         "AVFoundation"
