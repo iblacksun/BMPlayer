@@ -70,6 +70,10 @@ open class BMPlayerControlView: UIView {
     open var topMaskView    = UIView()
     open var bottomMaskView = UIView()
     
+    public let topRightStackView = UIStackView(frame: .zero)
+    public let bottomLeftStackView = UIStackView(frame: .zero)
+    public let bottomRightStackView = UIStackView(frame: .zero)
+    
     /// Image view to show video cover
     open var maskImageView = UIImageView()
     
@@ -518,6 +522,8 @@ open class BMPlayerControlView: UIView {
         topWrapperView.addSubview(titleLabel)
         topWrapperView.addSubview(chooseDefinitionView)
         
+        topWrapperView.addSubview(topRightStackView)
+        
         backButton.tag = BMPlayerControlView.ButtonType.back.rawValue
         backButton.setImage(BMImageResourcePath("Pod_Asset_BMPlayer_back"), for: .normal)
         backButton.addTarget(self, action: #selector(onButtonPressed(_:)), for: .touchUpInside)
@@ -530,12 +536,22 @@ open class BMPlayerControlView: UIView {
         
         // Bottom views
         bottomMaskView.addSubview(bottomWrapperView)
-        bottomWrapperView.addSubview(playButton)
         bottomWrapperView.addSubview(currentTimeLabel)
         bottomWrapperView.addSubview(totalTimeLabel)
         bottomWrapperView.addSubview(progressView)
         bottomWrapperView.addSubview(timeSlider)
-        bottomWrapperView.addSubview(fullscreenButton)
+        // 底部左侧控制区域
+        bottomWrapperView.addSubview(bottomLeftStackView)
+        bottomLeftStackView.axis = .horizontal
+        bottomLeftStackView.alignment = .center
+        bottomLeftStackView.addArrangedSubview(playButton)
+        
+        // 底部右侧控制区域
+        bottomWrapperView.addSubview(bottomRightStackView)
+        bottomRightStackView.axis = .horizontal
+        bottomRightStackView.alignment = .center
+        bottomRightStackView.addArrangedSubview(fullscreenButton)
+        //bottomWrapperView.addSubview(fullscreenButton)
         
         playButton.tag = BMPlayerControlView.ButtonType.play.rawValue
         playButton.setImage(BMImageResourcePath("Pod_Asset_BMPlayer_play"),  for: .normal)
@@ -672,16 +688,24 @@ open class BMPlayerControlView: UIView {
             make.height.equalTo(30)
         }
         
+        topRightStackView.snp.makeConstraints { maker in
+            maker.height.trailing.centerY.equalToSuperview()
+            maker.width.equalTo(50).priority(.low)
+        }
+        
         // Bottom views
+        bottomLeftStackView.snp.makeConstraints { maker in
+            maker.leading.centerY.height.equalToSuperview()
+        }
+        
         playButton.snp.makeConstraints { (make) in
             make.width.equalTo(50)
             make.height.equalTo(50)
-            make.left.bottom.equalToSuperview()
         }
         
         currentTimeLabel.snp.makeConstraints { [unowned self](make) in
-            make.left.equalTo(self.playButton.snp.right)
-            make.centerY.equalTo(self.playButton)
+            make.leading.equalTo(bottomLeftStackView.snp.trailing)
+            make.centerY.equalToSuperview()
             make.width.equalTo(40)
         }
         
@@ -702,12 +726,14 @@ open class BMPlayerControlView: UIView {
             make.width.equalTo(40)
         }
     
+        bottomRightStackView.snp.makeConstraints { maker in
+            maker.leading.equalTo(self.totalTimeLabel.snp.trailing)
+            maker.trailing.centerY.height.equalToSuperview()
+        }
+        
         fullscreenButton.snp.makeConstraints { [unowned self](make) in
             make.width.equalTo(50)
             make.height.equalTo(50)
-            make.centerY.equalTo(self.currentTimeLabel)
-            make.left.equalTo(self.totalTimeLabel.snp.right)
-            make.right.equalToSuperview()
         }
         
         loadingIndicator.snp.makeConstraints { [unowned self](make) in
