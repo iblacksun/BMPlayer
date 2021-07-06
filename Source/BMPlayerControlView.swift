@@ -662,18 +662,15 @@ open class BMPlayerControlView: UIView {
         
         bottomWrapperView.snp.makeConstraints { [unowned self](make) in
             make.height.equalTo(50)
-            if #available(iOS 11.0, *) {
-              make.bottom.left.right.equalTo(self.bottomMaskView.safeAreaLayoutGuide)
-              make.top.equalToSuperview()
-            } else {
-              make.edges.equalToSuperview()
-            }
+            make.bottom.left.right.equalTo(self.bottomMaskView.safeAreaLayoutGuide)
+            make.top.equalToSuperview()
         }
         
         // Top views
         backButton.snp.makeConstraints { (make) in
-          make.width.height.equalTo(50)
-          make.left.bottom.equalToSuperview()
+            make.width.equalTo(50)
+            make.height.equalToSuperview()
+            make.left.bottom.equalToSuperview()
         }
         
         titleLabel.snp.makeConstraints { [unowned self](make) in
@@ -689,29 +686,34 @@ open class BMPlayerControlView: UIView {
         }
         
         topRightStackView.snp.makeConstraints { maker in
-            maker.height.trailing.centerY.equalToSuperview()
+            maker.trailing.equalToSuperview().inset(5)
+            maker.height.centerY.equalToSuperview()
             maker.width.equalTo(50).priority(.low)
         }
         
         // Bottom views
         bottomLeftStackView.snp.makeConstraints { maker in
-            maker.leading.centerY.height.equalToSuperview()
+            maker.leading.equalToSuperview().inset(5)
+            maker.centerY.height.equalToSuperview()
+            maker.trailing.equalTo(currentTimeLabel.snp.leading)
         }
         
         playButton.snp.makeConstraints { (make) in
-            make.width.equalTo(50)
-            make.height.equalTo(50)
+            make.width.equalTo(40)
+            make.height.equalToSuperview()
         }
         
         currentTimeLabel.snp.makeConstraints { [unowned self](make) in
-            make.leading.equalTo(bottomLeftStackView.snp.trailing)
             make.centerY.equalToSuperview()
-            make.width.equalTo(40)
+        }
+        totalTimeLabel.snp.makeConstraints { [unowned self](make) in
+            make.centerY.equalTo(self.currentTimeLabel)
         }
         
         timeSlider.snp.makeConstraints { [unowned self](make) in
             make.centerY.equalTo(self.currentTimeLabel)
-            make.left.equalTo(self.currentTimeLabel.snp.right).offset(10).priority(750)
+            make.leading.equalTo(self.currentTimeLabel.snp.trailing).offset(10).priority(750)
+            make.trailing.equalTo(self.totalTimeLabel.snp.leading).offset(-10).priority(750)
             make.height.equalTo(30)
         }
         
@@ -719,21 +721,16 @@ open class BMPlayerControlView: UIView {
             make.centerY.left.right.equalTo(self.timeSlider)
             make.height.equalTo(2)
         }
-        
-        totalTimeLabel.snp.makeConstraints { [unowned self](make) in
-            make.centerY.equalTo(self.currentTimeLabel)
-            make.left.equalTo(self.timeSlider.snp.right).offset(5)
-            make.width.equalTo(40)
-        }
     
         bottomRightStackView.snp.makeConstraints { maker in
             maker.leading.equalTo(self.totalTimeLabel.snp.trailing)
-            maker.trailing.centerY.height.equalToSuperview()
+            maker.centerY.height.equalToSuperview()
+            maker.trailing.equalToSuperview().inset(5)
         }
         
         fullscreenButton.snp.makeConstraints { [unowned self](make) in
-            make.width.equalTo(50)
-            make.height.equalTo(50)
+            make.width.equalTo(40)
+            make.height.equalToSuperview()
         }
         
         loadingIndicator.snp.makeConstraints { [unowned self](make) in
