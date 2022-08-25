@@ -353,7 +353,8 @@ open class BMPlayer: UIView {
             guard let scene = self.window?.windowScene else {
                 return
             }
-            if !isFullScreen {
+            //TODO: iOS 16 发布后放开
+            /*if !isFullScreen {
                 scene.requestGeometryUpdate(.iOS(interfaceOrientations: .portrait)) { error in
                     debugPrint(error)
                 }
@@ -361,7 +362,7 @@ open class BMPlayer: UIView {
                 scene.requestGeometryUpdate(.iOS(interfaceOrientations: .landscapeRight)) { error in
                     debugPrint(error)
                 }
-            }
+            }*/
         } else {
             if !isFullScreen {
                 UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
@@ -379,7 +380,6 @@ open class BMPlayer: UIView {
     deinit {
         playerLayer?.pause()
         playerLayer?.prepareToDeinit()
-        NotificationCenter.default.removeObserver(self, name: UIApplication.didChangeStatusBarOrientationNotification, object: nil)
     }
     
     
@@ -389,7 +389,6 @@ open class BMPlayer: UIView {
             self.customControlView = customControlView
         }
         initUI()
-        initUIData()
         configureVolume()
         preparePlayer()
     }
@@ -403,7 +402,6 @@ open class BMPlayer: UIView {
         super.init(frame:CGRect.zero)
         self.customControlView = customControlView
         initUI()
-        initUIData()
         configureVolume()
         preparePlayer()
     }
@@ -432,10 +430,6 @@ open class BMPlayer: UIView {
         
         panGesture = UIPanGestureRecognizer(target: self, action: #selector(self.panDirection(_:)))
         self.addGestureRecognizer(panGesture)
-    }
-    
-    fileprivate func initUIData() {
-        //NotificationCenter.default.addObserver(self, selector: #selector(self.onOrientationChanged), name: UIApplication.didChangeStatusBarOrientationNotification, object: nil)
     }
     
     fileprivate func configureVolume() {
