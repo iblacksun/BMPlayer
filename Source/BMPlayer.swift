@@ -342,18 +342,36 @@ open class BMPlayer: UIView {
     @objc fileprivate func fullScreenButtonPressed() {
         self.isFullScreen.toggle()
         controlView.updateUI(self.isFullScreen)
-        if !isFullScreen {
-            UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
-            UIApplication.shared.setStatusBarHidden(false, with: .fade)
-            UIApplication.shared.statusBarOrientation = .portrait
-        } else {
-            UIDevice.current.setValue(UIInterfaceOrientation.landscapeRight.rawValue, forKey: "orientation")
-            UIApplication.shared.setStatusBarHidden(false, with: .fade)
-            UIApplication.shared.statusBarOrientation = .landscapeRight
-        }
+        
         // iPad 下 UIDevice.current.setValue( forKey: "orientation") 无效，无法触发通知，手动调用
-        if UIDevice.current.userInterfaceIdiom == .pad {
+        guard UIDevice.current.userInterfaceIdiom != .pad else {
             delegate?.bmPlayer(player: self, playerOrientChanged: isFullScreen)
+            return
+        }
+        delegate?.bmPlayer(player: self, playerOrientChanged: isFullScreen)
+        if #available(iOS 16.0, *) {
+            guard let scene = self.window?.windowScene else {
+                return
+            }
+            if !isFullScreen {
+                scene.requestGeometryUpdate(.iOS(interfaceOrientations: .portrait)) { error in
+                    debugPrint(error)
+                }
+            } else {
+                scene.requestGeometryUpdate(.iOS(interfaceOrientations: .landscapeRight)) { error in
+                    debugPrint(error)
+                }
+            }
+        } else {
+            if !isFullScreen {
+                UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
+                UIApplication.shared.setStatusBarHidden(false, with: .fade)
+                UIApplication.shared.statusBarOrientation = .portrait
+            } else {
+                UIDevice.current.setValue(UIInterfaceOrientation.landscapeRight.rawValue, forKey: "orientation")
+                UIApplication.shared.setStatusBarHidden(false, with: .fade)
+                UIApplication.shared.statusBarOrientation = .landscapeRight
+            }
         }
     }
     
@@ -417,7 +435,7 @@ open class BMPlayer: UIView {
     }
     
     fileprivate func initUIData() {
-        NotificationCenter.default.addObserver(self, selector: #selector(self.onOrientationChanged), name: UIApplication.didChangeStatusBarOrientationNotification, object: nil)
+        //NotificationCenter.default.addObserver(self, selector: #selector(self.onOrientationChanged), name: UIApplication.didChangeStatusBarOrientationNotification, object: nil)
     }
     
     fileprivate func configureVolume() {
