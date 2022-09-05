@@ -53,15 +53,15 @@ open class BMPlayer: UIView {
     
     //Closure fired when play time changed
     open var playTimeDidChange:((TimeInterval, TimeInterval) -> Void)?
-
+    
     //Closure fired when play state chaged
     @available(*, deprecated, message: "Use newer `isPlayingStateChanged`")
     open var playStateDidChange:((Bool) -> Void)?
-
+    
     open var playOrientChanged:((Bool) -> Void)?
-
+    
     open var isPlayingStateChanged:((Bool) -> Void)?
-
+    
     open var playStateChanged:((BMPlayerState) -> Void)?
     
     open var avPlayer: AVPlayer? {
@@ -316,21 +316,22 @@ open class BMPlayer: UIView {
         guard BMPlayerConf.enablePlaytimeGestures else { return }
         
         isSliderSliding = true
-        if let playerItem = playerLayer?.playerItem {
-            // 每次滑动需要叠加时间，通过一定的比例，使滑动一直处于统一水平
-            self.sumTime = self.sumTime + TimeInterval(value) / 100.0 * (TimeInterval(self.totalDuration)/400)
-            
-            let totalTime = playerItem.duration
-            
-            // 防止出现NAN
-            if totalTime.timescale == 0 { return }
-            
-            let totalDuration = TimeInterval(totalTime.value) / TimeInterval(totalTime.timescale)
-            if (self.sumTime >= totalDuration) { self.sumTime = totalDuration }
-            if (self.sumTime <= 0) { self.sumTime = 0 }
-            
-            controlView.showSeekToView(to: sumTime, total: totalDuration, isAdd: value > 0)
+        guard let playerItem = playerLayer?.playerItem else {
+            return
         }
+        // 每次滑动需要叠加时间，通过一定的比例，使滑动一直处于统一水平
+        self.sumTime = self.sumTime + TimeInterval(value) / 100.0 * (TimeInterval(self.totalDuration)/400)
+        
+        let totalTime = playerItem.duration
+        
+        // 防止出现NAN
+        if totalTime.timescale == 0 { return }
+        
+        let totalDuration = TimeInterval(totalTime.value) / TimeInterval(totalTime.timescale)
+        if (self.sumTime >= totalDuration) { self.sumTime = totalDuration }
+        if (self.sumTime <= 0) { self.sumTime = 0 }
+        
+        controlView.showSeekToView(to: sumTime, total: totalDuration, isAdd: value > 0)
     }
     
     @objc open func onOrientationChanged() {
@@ -355,14 +356,14 @@ open class BMPlayer: UIView {
             }
             //TODO: iOS 16 发布后放开
             /*if !isFullScreen {
-                scene.requestGeometryUpdate(.iOS(interfaceOrientations: .portrait)) { error in
-                    debugPrint(error)
-                }
-            } else {
-                scene.requestGeometryUpdate(.iOS(interfaceOrientations: .landscapeRight)) { error in
-                    debugPrint(error)
-                }
-            }*/
+             scene.requestGeometryUpdate(.iOS(interfaceOrientations: .portrait)) { error in
+             debugPrint(error)
+             }
+             } else {
+             scene.requestGeometryUpdate(.iOS(interfaceOrientations: .landscapeRight)) { error in
+             debugPrint(error)
+             }
+             }*/
         } else {
             if !isFullScreen {
                 UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
@@ -378,6 +379,7 @@ open class BMPlayer: UIView {
     
     // MARK: - 生命周期
     deinit {
+        debugPrint("BMPlayer deinit")
         playerLayer?.pause()
         playerLayer?.prepareToDeinit()
     }
@@ -446,8 +448,8 @@ open class BMPlayer: UIView {
         playerLayer!.videoGravity = videoGravity
         insertSubview(playerLayer!, at: 0)
         playerLayer!.snp.makeConstraints { [weak self](make) in
-          guard let `self` = self else { return }
-          make.edges.equalTo(self)
+            guard let `self` = self else { return }
+            make.edges.equalTo(self)
         }
         playerLayer!.delegate = self
         controlView.showLoader()
@@ -481,14 +483,14 @@ extension BMPlayer: BMPlayerLayerViewDelegate {
                 play()
             }
             if shouldSeekTo != 0 {
-                seek(shouldSeekTo, completion: {[weak self] in
-                  guard let `self` = self else { return }
-                  if !self.isPauseByUser {
-                      self.play()
-                  } else {
-                      self.pause()
-                  }
-                })
+                seek(shouldSeekTo) {[weak self] in
+                    guard let `self` = self else { return }
+                    if !self.isPauseByUser {
+                        self.play()
+                    } else {
+                        self.pause()
+                    }
+                }
             }
             
         case .bufferFinished:
@@ -496,7 +498,6 @@ extension BMPlayer: BMPlayerLayerViewDelegate {
             
         case .playedToTheEnd:
             isPlayToTheEnd = true
-            
         default:
             break
         }
@@ -530,41 +531,42 @@ extension BMPlayer: BMPlayerControlViewDelegate {
     
     open func controlView(controlView: BMPlayerControlView,
                           didPressButton button: UIButton) {
-        if let action = BMPlayerControlView.ButtonType(rawValue: button.tag) {
-            switch action {
-            case .back:
-                backBlock?(isFullScreen)
-                if isFullScreen {
-                    fullScreenButtonPressed()
-                }/* else {
-                    playerLayer?.prepareToDeinit()
-                }*/
-                
-            case .play:
-                if button.isSelected {
-                    pause()
-                } else {
-                    if isPlayToTheEnd {
-                        seek(0, completion: {[weak self] in
-                          self?.play()
-                        })
-                        controlView.hidePlayToTheEndView()
-                        isPlayToTheEnd = false
-                    }
-                    play()
-                }
-                
-            case .replay:
-                isPlayToTheEnd = false
-                seek(0)
-                play()
-                
-            case .fullscreen:
+        guard let action = BMPlayerControlView.ButtonType(rawValue: button.tag) else {
+            return
+        }
+        
+        switch action {
+        case .back:
+            backBlock?(isFullScreen)
+            if isFullScreen {
                 fullScreenButtonPressed()
-                
-            default:
-                print("[Error] unhandled Action")
+            }/* else {
+              playerLayer?.prepareToDeinit()
+              }*/
+        case .play:
+            if button.isSelected {
+                pause()
+            } else {
+                if isPlayToTheEnd {
+                    seek(0){[weak self] in
+                        self?.play()
+                    }
+                    controlView.hidePlayToTheEndView()
+                    isPlayToTheEnd = false
+                }
+                play()
             }
+            
+        case .replay:
+            isPlayToTheEnd = false
+            seek(0)
+            play()
+            
+        case .fullscreen:
+            fullScreenButtonPressed()
+            
+        default:
+            print("[Error] unhandled Action")
         }
     }
     
@@ -582,14 +584,14 @@ extension BMPlayer: BMPlayerControlViewDelegate {
             
             if isPlayToTheEnd {
                 isPlayToTheEnd = false
-                seek(target, completion: {[weak self] in
-                  self?.play()
-                })
+                seek(target){[weak self] in
+                    self?.play()
+                }
                 controlView.hidePlayToTheEndView()
             } else {
-                seek(target, completion: {[weak self] in
-                  self?.autoPlay()
-                })
+                seek(target){[weak self] in
+                    self?.autoPlay()
+                }
             }
         default:
             break
