@@ -354,16 +354,15 @@ open class BMPlayer: UIView {
             guard let scene = self.window?.windowScene else {
                 return
             }
-            //TODO: iOS 16 发布后放开
-            /*if !isFullScreen {
-             scene.requestGeometryUpdate(.iOS(interfaceOrientations: .portrait)) { error in
-             debugPrint(error)
-             }
-             } else {
-             scene.requestGeometryUpdate(.iOS(interfaceOrientations: .landscapeRight)) { error in
-             debugPrint(error)
-             }
-             }*/
+            if !isFullScreen {
+                scene.requestGeometryUpdate(.iOS(interfaceOrientations: .portrait)) { error in
+                    debugPrint(error)
+                }
+            } else {
+                scene.requestGeometryUpdate(.iOS(interfaceOrientations: .landscapeRight)) { error in
+                    debugPrint(error)
+                }
+            }
         } else {
             if !isFullScreen {
                 UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
