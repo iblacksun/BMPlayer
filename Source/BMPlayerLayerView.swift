@@ -452,17 +452,14 @@ open class BMPlayerLayerView: UIView {
     }
     
     @objc fileprivate func connectPlayerLayer() {
-        defer {
-            layer.addSublayer(playerLayer!)
-        }
-        guard playerLayer == nil else {
-            return
-        }
+        playerLayer?.removeFromSuperlayer()
         playerLayer = AVPlayerLayer(player: player)
         playerLayer!.videoGravity = videoGravity
+        layer.addSublayer(playerLayer!)
     }
     
     @objc fileprivate func disconnectPlayerLayer() {
         playerLayer?.removeFromSuperlayer()
+        playerLayer = nil
     }
 }
