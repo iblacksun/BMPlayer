@@ -345,10 +345,10 @@ open class BMPlayer: UIView {
         controlView.updateUI(self.isFullScreen)
         
         // iPad 下 UIDevice.current.setValue( forKey: "orientation") 无效，无法触发通知，手动调用
-        guard UIDevice.current.userInterfaceIdiom != .pad else {
+        /*guard UIDevice.current.userInterfaceIdiom != .pad else {
             delegate?.bmPlayer(player: self, playerOrientChanged: isFullScreen)
             return
-        }
+        }*/
         delegate?.bmPlayer(player: self, playerOrientChanged: isFullScreen)
         if #available(iOS 16.0, *) {
             guard let scene = self.window?.windowScene else {
