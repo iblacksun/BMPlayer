@@ -344,35 +344,28 @@ open class BMPlayer: UIView {
         self.isFullScreen.toggle()
         controlView.updateUI(self.isFullScreen)
         
-        // iPad 下 UIDevice.current.setValue( forKey: "orientation") 无效，无法触发通知，手动调用
-        /*guard UIDevice.current.userInterfaceIdiom != .pad else {
-            delegate?.bmPlayer(player: self, playerOrientChanged: isFullScreen)
-            return
-        }*/
         delegate?.bmPlayer(player: self, playerOrientChanged: isFullScreen)
+        
+        guard let scene = self.window?.windowScene else {
+            return
+        }
         if #available(iOS 16.0, *) {
-            guard let scene = self.window?.windowScene else {
-                return
-            }
-            if !isFullScreen {
+            DispatchQueue.main.async {
+                let mask: UIInterfaceOrientationMask = self.isFullScreen ? .landscapeRight : .portrait
                 scene.requestGeometryUpdate(.iOS(interfaceOrientations: .portrait)) { error in
                     debugPrint(error)
                 }
-            } else {
-                scene.requestGeometryUpdate(.iOS(interfaceOrientations: .landscapeRight)) { error in
-                    debugPrint(error)
-                }
             }
+            return
+        }
+        if !isFullScreen {
+            UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
+            UIApplication.shared.setStatusBarHidden(false, with: .fade)
+            UIApplication.shared.statusBarOrientation = .portrait
         } else {
-            if !isFullScreen {
-                UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
-                UIApplication.shared.setStatusBarHidden(false, with: .fade)
-                UIApplication.shared.statusBarOrientation = .portrait
-            } else {
-                UIDevice.current.setValue(UIInterfaceOrientation.landscapeRight.rawValue, forKey: "orientation")
-                UIApplication.shared.setStatusBarHidden(false, with: .fade)
-                UIApplication.shared.statusBarOrientation = .landscapeRight
-            }
+            UIDevice.current.setValue(UIInterfaceOrientation.landscapeRight.rawValue, forKey: "orientation")
+            UIApplication.shared.setStatusBarHidden(false, with: .fade)
+            UIApplication.shared.statusBarOrientation = .landscapeRight
         }
     }
     
