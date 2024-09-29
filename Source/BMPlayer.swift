@@ -351,8 +351,11 @@ open class BMPlayer: UIView {
         }
         if #available(iOS 16.0, *) {
             DispatchQueue.main.async {
-                let mask: UIInterfaceOrientationMask = self.isFullScreen ? .landscapeRight : .portrait
-                scene.requestGeometryUpdate(.iOS(interfaceOrientations: .portrait)) { error in
+                var mask: UIInterfaceOrientationMask = .portrait
+                if self.isFullScreen {
+                    mask = self.fullScreenOrientationMask()
+                }
+                scene.requestGeometryUpdate(.iOS(interfaceOrientations: mask)) { error in
                     debugPrint(error)
                 }
             }
@@ -367,6 +370,21 @@ open class BMPlayer: UIView {
             UIApplication.shared.setStatusBarHidden(false, with: .fade)
             UIApplication.shared.statusBarOrientation = .landscapeRight
         }
+    }
+    
+    // 全屏场景的模式,注：UIDeviceOrientation与UIInterfaceOrientation在横屏landscape方向值相反！！！！
+    private func fullScreenOrientationMask() -> UIInterfaceOrientationMask {
+        let deviceOrientation = UIDevice.current.orientation
+        let value: UIInterfaceOrientation
+        switch deviceOrientation {
+        case .landscapeRight:
+            value = .landscapeLeft
+        case .landscapeLeft:
+            value = .landscapeRight
+        default:
+            value = .landscapeRight
+        }
+        return UIInterfaceOrientationMask(rawValue: 1 << value.rawValue)
     }
     
     // MARK: - 生命周期
