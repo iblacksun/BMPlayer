@@ -557,20 +557,24 @@ extension BMPlayer: BMPlayerControlViewDelegate {
             if button.isSelected {
                 pause()
             } else {
-                if isPlayToTheEnd {
-                    seek(0){[weak self] in
-                        self?.play()
-                    }
-                    controlView.hidePlayToTheEndView()
-                    isPlayToTheEnd = false
+                guard isPlayToTheEnd else {
+                    play()
+                    return
                 }
-                play()
+                isPlayToTheEnd = false
+                
+                seek(0){[weak self, weak controlView] in
+                    self?.play()
+                    controlView?.hidePlayToTheEndView()
+                }
             }
             
         case .replay:
+            seek(0){[weak self, weak controlView] in
+                self?.play()
+                controlView?.hidePlayToTheEndView()
+            }
             isPlayToTheEnd = false
-            seek(0)
-            play()
             
         case .fullscreen:
             fullScreenButtonPressed()
