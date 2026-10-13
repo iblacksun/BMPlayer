@@ -26,3 +26,7 @@ Carthage/*
 Carthage/Checkouts/*
 /Carthage/Checkouts/SnapKit
 /Carthage/Checkouts/NVActivityIndicatorView
+
+# Swift Package Manager
+.build/
+.swiftpm/
