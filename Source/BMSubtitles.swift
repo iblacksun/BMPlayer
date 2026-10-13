@@ -17,23 +17,22 @@ public class BMSubtitles {
         var end  : TimeInterval
         var text : String
         
-        init(_ index: Int, _ start: NSString, _ end: NSString, _ text: NSString) {
+        init(_ index: Int, _ start: String, _ end: String, _ text: String) {
             self.index = index
-            self.start = Group.parseDuration(start as String)
-            self.end   = Group.parseDuration(end as String)
-            self.text  = text as String
+            self.start = Group.parseDuration(start)
+            self.end   = Group.parseDuration(end)
+            self.text  = text
         }
         
         static func parseDuration(_ fromStr:String) -> TimeInterval {
-            var h: TimeInterval = 0.0, m: TimeInterval = 0.0, s: TimeInterval = 0.0, c: TimeInterval = 0.0
             let scanner = Scanner(string: fromStr)
-            scanner.scanDouble(&h)
-            scanner.scanString(":", into: nil)
-            scanner.scanDouble(&m)
-            scanner.scanString(":", into: nil)
-            scanner.scanDouble(&s)
-            scanner.scanString(",", into: nil)
-            scanner.scanDouble(&c)
+            let h = scanner.scanDouble() ?? 0.0
+            _ = scanner.scanString(":")
+            let m = scanner.scanDouble() ?? 0.0
+            _ = scanner.scanString(":")
+            let s = scanner.scanDouble() ?? 0.0
+            _ = scanner.scanString(",")
+            let c = scanner.scanDouble() ?? 0.0
             return (h * 3600.0) + (m * 60.0) + s + (c / 1000.0)
         }
         
@@ -86,28 +85,24 @@ public class BMSubtitles {
         var groups: [Group] = []
         let scanner = Scanner(string: payload)
         while !scanner.isAtEnd {
-            var indexString: NSString?
-            scanner.scanUpToCharacters(from: .newlines, into: &indexString)
+            let indexString = scanner.scanUpToCharacters(from: .newlines)
             
-            var startString: NSString?
-            scanner.scanUpTo(" --> ", into: &startString)
+            let startString = scanner.scanUpToString(" --> ")
             
             // skip spaces and newlines by default.
-            scanner.scanString("-->", into: nil)
+            _ = scanner.scanString("-->")
             
-            var endString: NSString?
-            scanner.scanUpToCharacters(from: .newlines, into: &endString)
+            let endString = scanner.scanUpToCharacters(from: .newlines)
             
-            var textString: NSString?
-            scanner.scanUpTo("\r\n\r\n", into: &textString)
+            var textString = scanner.scanUpToString("\r\n\r\n")
             
             if let text = textString {
-                textString = text.trimmingCharacters(in: .whitespaces) as NSString
-                textString = text.replacingOccurrences(of: "\r", with: "") as NSString
+                textString = text.trimmingCharacters(in: .whitespaces)
+                textString = text.replacingOccurrences(of: "\r", with: "")
             }
             
             if let indexString = indexString,
-                let index = Int(indexString as String),
+                let index = Int(indexString),
                 let start = startString,
                 let end   = endString,
                 let text  = textString {

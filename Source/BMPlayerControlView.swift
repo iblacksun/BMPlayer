@@ -10,7 +10,7 @@ import UIKit
 import NVActivityIndicatorView
 
 
-@objc public protocol BMPlayerControlViewDelegate: class {
+@objc public protocol BMPlayerControlViewDelegate: AnyObject {
     /**
      call when control view choose a definition
      
@@ -237,8 +237,6 @@ open class BMPlayerControlView: UIView {
     open func controlViewAnimation(isShow: Bool) {
         let alpha: CGFloat = isShow ? 1.0 : 0.0
         self.isMaskShowing = isShow
-        
-        UIApplication.shared.setStatusBarHidden(!isShow, with: .fade)
         
         UIView.animate(withDuration: 0.3, animations: {[weak self] in
             guard let wSelf = self else { return }
@@ -703,7 +701,7 @@ open class BMPlayerControlView: UIView {
             make.height.equalToSuperview()
         }
         
-        currentTimeLabel.snp.makeConstraints { [unowned self](make) in
+        currentTimeLabel.snp.makeConstraints { (make) in
             make.centerY.equalToSuperview()
         }
         totalTimeLabel.snp.makeConstraints { [unowned self](make) in
@@ -728,7 +726,7 @@ open class BMPlayerControlView: UIView {
             maker.trailing.equalToSuperview().inset(5)
         }
         
-        fullscreenButton.snp.makeConstraints { [unowned self](make) in
+        fullscreenButton.snp.makeConstraints { (make) in
             make.width.equalTo(40)
             make.height.equalToSuperview()
         }

@@ -11,7 +11,7 @@ import SnapKit
 import MediaPlayer
 
 /// BMPlayerDelegate to obserbe player state
-public protocol BMPlayerDelegate : class {
+public protocol BMPlayerDelegate : AnyObject {
     func bmPlayer(player: BMPlayer, playerStateDidChange state: BMPlayerState)
     func bmPlayer(player: BMPlayer, loadedTimeDidChange loadedDuration: TimeInterval, totalDuration: TimeInterval)
     func bmPlayer(player: BMPlayer, playTimeDidChange currentTime : TimeInterval, totalTime: TimeInterval)
@@ -56,7 +56,11 @@ open class BMPlayer: UIView {
     
     //Closure fired when play state chaged
     @available(*, deprecated, message: "Use newer `isPlayingStateChanged`")
-    open var playStateDidChange:((Bool) -> Void)?
+    open var playStateDidChange:((Bool) -> Void)? {
+        get { _playStateDidChange }
+        set { _playStateDidChange = newValue }
+    }
+    private var _playStateDidChange:((Bool) -> Void)?
     
     open var playOrientChanged:((Bool) -> Void)?
     
@@ -363,12 +367,8 @@ open class BMPlayer: UIView {
         }
         if !isFullScreen {
             UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
-            UIApplication.shared.setStatusBarHidden(false, with: .fade)
-            UIApplication.shared.statusBarOrientation = .portrait
         } else {
             UIDevice.current.setValue(UIInterfaceOrientation.landscapeRight.rawValue, forKey: "orientation")
-            UIApplication.shared.setStatusBarHidden(false, with: .fade)
-            UIApplication.shared.statusBarOrientation = .landscapeRight
         }
     }
     
@@ -405,7 +405,7 @@ open class BMPlayer: UIView {
         preparePlayer()
     }
     
-    @available(*, deprecated:3.0, message:"Use newer init(customControlView:_)")
+    @available(*, deprecated, message:"Use newer init(customControlView:_)")
     public convenience init(customControllView: BMPlayerControlView?) {
         self.init(customControlView: customControllView)
     }
@@ -471,7 +471,7 @@ extension BMPlayer: BMPlayerLayerViewDelegate {
     public func bmPlayer(player: BMPlayerLayerView, playerIsPlaying playing: Bool) {
         controlView.playStateDidChange(isPlaying: playing)
         delegate?.bmPlayer(player: self, playerIsPlaying: playing)
-        playStateDidChange?(player.isPlaying)
+        _playStateDidChange?(player.isPlaying)
         isPlayingStateChanged?(player.isPlaying)
     }
     
@@ -612,7 +612,7 @@ extension BMPlayer: BMPlayerControlViewDelegate {
         }
     }
     
-    open func controlView(controlView: BMPlayerControlView, didChangeVideoAspectRatio: BMPlayerAspectRatio) {
+    public func controlView(controlView: BMPlayerControlView, didChangeVideoAspectRatio: BMPlayerAspectRatio) {
         self.playerLayer?.aspectRatio = self.aspectRatio
     }
     

@@ -42,7 +42,7 @@ public enum BMPlayerAspectRatio : Int {
     case four2THREE
 }
 
-public protocol BMPlayerLayerViewDelegate : class {
+public protocol BMPlayerLayerViewDelegate : AnyObject {
     func bmPlayer(player: BMPlayerLayerView, playerStateDidChange state: BMPlayerState)
     func bmPlayer(player: BMPlayerLayerView, loadedTimeDidChange loadedDuration: TimeInterval, totalDuration: TimeInterval)
     func bmPlayer(player: BMPlayerLayerView, playTimeDidChange currentTime: TimeInterval, totalTime: TimeInterval)
